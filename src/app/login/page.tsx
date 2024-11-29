@@ -2,9 +2,9 @@
 
 "use client"
 
-import { useState } from "react";
-import { useWebSocket } from "@/context/WebSocketContext";
-import { useRouter } from "next/navigation";
+import {useState} from "react";
+import {useWebSocket} from "@/context/WebSocketContext";
+import {useRouter} from "next/navigation";
 import config from "@/config/config";
 
 let sequenceId = 0;
@@ -23,7 +23,7 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [token, setToken] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-  const { ws, setWs } = useWebSocket();
+  const { setWs } = useWebSocket();
   const router = useRouter();
 
   const handleLogin = () => {

@@ -1,9 +1,8 @@
-"use client"
-import {useEffect, useState} from 'react';
+"use client";
 
-import {useRouter, useSearchParams} from "next/navigation";
-
-import {useWebSocket} from "@/context/WebSocketContext";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useWebSocket } from "@/context/WebSocketContext";
 
 let sequenceId = 0;
 
@@ -32,39 +31,38 @@ interface Message {
 
 const ChatPage = () => {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [messageText, setMessageText] = useState('');
+  const [messageText, setMessageText] = useState("");
   const { ws } = useWebSocket();
   const router = useRouter();
-  const [mtime, setMtime] = useState('');
+  const [mtime, setMtime] = useState("");
 
-  const searchParams = useSearchParams();
-  const userId = searchParams?.get('userId');
+  // 使用 URLSearchParams 代替 useSearchParams
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setUserId(params.get("userId"));
+  }, []);
 
   useEffect(() => {
     if (!ws) {
-      // 如果没有 WebSocket 连接，重定向到登录页面
-      router.push('/login');
+      router.push("/login");
       return;
     }
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      console.log("data:",data)
-      if (data.cmd === 11) {
-        // 收到消息
-        if (data.from === userId) {
-          // 展示倒霉熊的消息或发送给当前用户的消息
-          setMessages((prevMessages) => [...prevMessages, data]);
-        }
+      if (data.cmd === 11 && data.from === userId) {
+        setMessages((prevMessages) => [...prevMessages, data]);
       }
     };
 
     ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
+      console.error("WebSocket error:", error);
     };
 
     ws.onclose = () => {
-      console.log('WebSocket connection closed');
+      console.log("WebSocket connection closed");
     };
   }, [ws, userId]);
 
@@ -72,8 +70,8 @@ const ChatPage = () => {
     const updateTime = () => {
       const now = new Date();
       const hours = now.getHours();
-      const minutes = ('0' + now.getMinutes()).slice(-2);
-      const seconds = ('0' + now.getSeconds()).slice(-2);
+      const minutes = ("0" + now.getMinutes()).slice(-2);
+      const seconds = ("0" + now.getSeconds()).slice(-2);
       setMtime(`${hours}:${minutes}:${seconds}`);
     };
 
@@ -88,10 +86,10 @@ const ChatPage = () => {
       const message: Message = {
         cmd: 11,
         sequence: generateSequenceId(),
-        to: userId as string,
+        to: userId,
         timestamp: getTimestamp(),
         body: {
-          msgType: 'text',
+          msgType: "text",
           content: {
             text: messageText,
           },
@@ -99,31 +97,28 @@ const ChatPage = () => {
       };
 
       ws.send(JSON.stringify(message));
-
-      // 添加到本地消息列表
       setMessages((prevMessages) => [...prevMessages, message]);
-
-      setMessageText('');
+      setMessageText("");
     }
   };
 
   return (
     <div id="container">
       <div className="header">
-        <span style={{ float: 'left' }}>微信聊天界面</span>
-        <span id="mtime" style={{ float: 'right' }}>{mtime}</span>
+        <span style={{ float: "left" }}>微信聊天界面</span>
+        <span id="mtime" style={{ float: "right" }}>{mtime}</span>
       </div>
       <ul className="content">
         {messages.map((msg, index) => {
           const isSelf = msg.to === userId;
-          const imgClass = isSelf ? 'imgright' : 'imgleft';
-          const spanClass = isSelf ? 'spanright' : 'spanleft';
-          const nickClass = isSelf ? 'nickright' : 'nickleft';
-          const imgSrc = isSelf ? '/image/t2.jpg' : '/image/t1.jpg';
+          const imgClass = isSelf ? "imgright" : "imgleft";
+          const spanClass = isSelf ? "spanright" : "spanleft";
+          const nickClass = isSelf ? "nickright" : "nickleft";
+          const imgSrc = isSelf ? "/image/t2.jpg" : "/image/t1.jpg";
           return (
             <li key={index}>
               <img src={imgSrc} className={imgClass} />
-              <span className={nickClass}>{isSelf ? '我' : msg.from || '对方'}</span>
+              <span className={nickClass}>{isSelf ? "我" : msg.from || "对方"}</span>
               <span className={spanClass}>{msg.body.content.text}</span>
             </li>
           );
@@ -140,7 +135,7 @@ const ChatPage = () => {
           value={messageText}
           onChange={(e) => setMessageText(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === 'Enter') {
+            if (e.key === "Enter") {
               handleSendMessage();
             }
           }}

@@ -1,5 +1,5 @@
 "use client"
-import React, {createContext, useContext, useState} from 'react';
+import React, {createContext, useContext, useState, ReactNode} from 'react';
 
 interface WebSocketContextValue {
   ws: WebSocket | null;
@@ -8,18 +8,20 @@ interface WebSocketContextValue {
 
 const WebSocketContext = createContext<WebSocketContextValue>({
   ws: null,
-  setWs: () => {
-  },
+  setWs: () => {},
 });
 
 export const useWebSocket = () => useContext(WebSocketContext);
 
-// @ts-ignore
-export const WebSocketProvider: React.FC = ({children}) => {
+interface WebSocketProviderProps {
+  children: ReactNode;
+}
+
+export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }) => {
   const [ws, setWs] = useState<WebSocket | null>(null);
 
   return (
-    <WebSocketContext.Provider value={{ws, setWs}}>
+    <WebSocketContext.Provider value={{ ws, setWs }}>
       {children}
     </WebSocketContext.Provider>
   );
