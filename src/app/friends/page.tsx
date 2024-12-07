@@ -14,10 +14,12 @@ const FriendsListPage = () => {
   function getOnlineUser() {
     // 获取在线用户
 
-    fetch(config.server + '/api/im/onlineUsers')
+    fetch(config.server + '/api/v1/im/onlineUsers')
       .then((response) => response.json())
       .then((data) => {
-        setOnlineUsers(data);
+        if(data?.data){
+          setOnlineUsers(data.data);
+        }
       })
       .catch((error) => {
         console.error('Error fetching online users:', error);
